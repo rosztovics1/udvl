@@ -1,0 +1,116 @@
+class Formula:
+    def __init__(self,subformulas):
+        self.subformulas = subformulas
+
+    def subf(self):
+        return self.subformulas
+
+    def toString(self):
+        return ""
+
+    def eval(self, i):
+        pass
+
+class Variable(Formula):
+    def __init__(self, name):
+        Formula.__init__(self, []) #premenna nema podformulu
+        self.name = name
+
+    def toString(self):
+        return self.name
+
+    def eval(self, i):
+        return i[self.name] #hodi exception ak premenna nie je v i
+
+class Negation(Formula):
+    def __init__(self, subformulas):
+        Formula.__init__(self,[subformulas])
+
+    def originalFormula(self):
+        return self.subf()[0]
+    
+    def toString(self):
+        return "-" + self.originalFormula().toString()
+
+    def eval(self,i):
+        return not self.originalFormula().eval(i)
+
+class Disjunction(Formula):
+    def __init__(self, subformulas):
+        Formula.__init__(self,subformulas)
+        self.subformulas = subformulas
+
+    def toString(self):
+        s = "("
+        for sf in self.subf():
+            s+= sf.toString() + "|"
+        s = s[:-1]
+        s+= ")"
+        return s
+
+    def eval(self,i):
+        for sf in self.subf():
+            if sf.eval(i):
+                return True #aspon jedna podformula je True
+        return False
+
+class Conjunction(Formula):
+    def __init__(self, subformulas):
+        Formula.__init__(self,subformulas)
+        self.subformulas = subformulas
+
+    def toString(self):
+        s = "("
+        for sf in self.subf():
+            s+= sf.toString() + "&"
+        s = s[:-1]
+        s+= ")"
+        return s
+
+    def eval(self,i):
+        for sf in self.subf():
+            if sf.eval(i) == False:
+                return False #aspon jedna podformula je False
+        return True
+    
+class Implication(Formula):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def leftSide(self):
+        return self.left
+               
+    def rightSide(self):
+        return self.right
+
+    def toString(self):
+        return "("+self.leftSide().toString()+"=>"+self.rightSide().toString()+")"
+
+    def eval(self,i):
+        if self.leftSide().eval(i) == self.rightSide().eval(i):
+            return True
+        if self.leftSide().eval(i) == True and self.rightSide().eval(i) == False:
+            return False
+        if self.leftSide().eval(i) == False and self.rightSide().eval(i) == True:
+            return True
+        return False
+
+class Equivalence(Formula):
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+
+    def leftSide(self):
+        return self.left
+               
+    def rightSide(self):
+        return  self.right
+
+    def toString(self):
+        return "("+self.leftSide().toString()+"<=>"+self.rightSide().toString()+")"
+
+    def eval(self,i):
+        if self.leftSide().eval(i) == self.rightSide().eval(i):
+            return True
+        return False
